@@ -1,0 +1,35 @@
+	public function reward_adjustment( $run_this ) {
+
+	
+			if ( ! function_exists( 'wc_get_order' ) ) return $run_this;
+
+			extract( $run_this );
+			$prefs = mycred_part_woo_settings();
+			if ( ! array_key_exists( 'rewards', $prefs ) || $prefs['rewards'] != 2 ) return $run_this;
+
+			if ( apply_filters( 'mycred_woo_reward_reference', 'reward', 0, $type ) == $ref && apply_filters( 'mycred_woo_reward_mycred_payment', false, 0 ) === false ) {
+
+				$order_id = absint( $ref_id );
+				$order    = wc_get_order( $order_id );
+
+  $discount = $order->get_discount_total();
+				if ( $discount <= 0 ) return $run_this;
+
+				if ( $prefs['exchange'] != 1 )
+					$discount = $discount / $prefs['exchange'];
+
+				if ( ( $amount - $discount ) <= 0 ) {
+					$run_this['amount'] = NULL;
+					$run_this['entry']  = '';
+				}
+
+				else {
+					$run_this['amount'] = ( $amount - $discount );
+			
+				}
+
+			}
+
+			return $run_this;
+
+		}
